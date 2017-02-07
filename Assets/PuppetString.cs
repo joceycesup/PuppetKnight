@@ -12,10 +12,14 @@ public class PuppetString : MonoBehaviour {
 		private set;
 	}
 	[SerializeField]
-	[Range(10000f, 100000f)]
+	[Range(5000f, 100000f)]
 	float springConstant = 10000f;
+	[SerializeField]
+	[Range(0f, 100000f)]
+	float viscousDampingCoefficient = 10000f;
+
 	private float relaxedLength;
-	private Vector3 lastVelocity;
+	private Vector3 lastPos;
 
 	public string controllerExtension = "L";
 
@@ -24,7 +28,7 @@ public class PuppetString : MonoBehaviour {
 			return;
 		rb = attachedObject.GetComponent<Rigidbody> ();
 		lr = GetComponent<LineRenderer> ();
-		relaxedLength = Vector3.SqrMagnitude (transform.position - attachedObject.transform.position);
+		relaxedLength = Vector3.Magnitude (transform.position - attachedObject.transform.position);
 	}
 
 	void Update () {
@@ -42,12 +46,19 @@ public class PuppetString : MonoBehaviour {
 			/*
 			acceleration = (rb.velocity - lastVelocity) / Time.fixedDeltaTime;
 			lastVelocity = rb.velocity;//*/
-			if (Vector3.SqrMagnitude (transform.position - attachedObject.transform.position) > relaxedLength) {
-				rb.AddForce ((transform.position - attachedObject.transform.position) * Time.fixedDeltaTime * springConstant, ForceMode.Force);
+			float magnitude = Vector3.Magnitude (transform.position - attachedObject.transform.position);
+			if (magnitude > relaxedLength) {
+				//spring
+				rb.AddForce (Vector3.Normalize (transform.position - attachedObject.transform.position) * Time.fixedDeltaTime * springConstant * (magnitude - relaxedLength), ForceMode.Force);
+				//dampening
+				if (viscousDampingCoefficient > 0f) {
+					rb.AddForce (-viscousDampingCoefficient * Vector3.Project (attachedObject.transform.position - lastPos, transform.position - attachedObject.transform.position) * Time.fixedDeltaTime, ForceMode.Force);
+				}
 				lr.SetColors (Color.red, Color.red);
 			} else {
 				lr.SetColors (Color.green, Color.green);
 			}
 		}
+		lastPos = attachedObject.transform.position;
 	}
 }

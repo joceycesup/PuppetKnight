@@ -1,2 +1,3 @@
 http://res-nlp.univ-lemans.fr/NLP_C_M01_G02/co/Contenu_062.html
 https://docs.unity3d.com/Manual/RagdollStability.html
+https://en.wikipedia.org/wiki/Harmonic_oscillator
